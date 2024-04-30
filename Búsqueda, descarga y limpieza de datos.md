@@ -48,6 +48,7 @@ BRCA.exp <- GDCprepare(
 En este paso utilizaremos la función 'assay' del paquete _SummarizedExperiment_:
 ```R
 rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en un objeto
+write.table(rnaseq, "RNASeq(counts)_BCRA.txt") # para guardar la matriz en un archivo .txt
 ```
 Al explorar la matriz podemos ver cómo se asignan los códigos de cada muestra (nombre de columna) y cada gen (nombre de fila)
 ```R
@@ -56,8 +57,9 @@ rnaseq[0:2,0:2] # para poder ver los nombres de las filas y columnas, incluimos 
 ENSG00000000003.15                         3414                          879
 ENSG00000000005.6                           210                            9
 ```
-El código de la muestra (nombre de la columna) está compuesto por letras y números que brindan información sobre el proyecto, el sitio de extracción de la muestra, etc. En el siguiente [link](https://docs.gdc.cancer.gov/Encyclopedia/pages/TCGA_Barcode/) de la documentación del GDC se encuentra disponible la información para comprender cómo es la clasificación y qué información puedo obtener del código identificador. La descripción completa del código se encuentra en disponible en [TCGA Code Tables](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables). La correcta interpretación del código, nos permitirá seleccionar aquellas muestras de interés y generar una asignación correcta de las mismas para los análisis de contrastes entre grupos.  
-El identificador del gen es el acordad por el Consorcio de Anotación de Genomas (Gencode) y está compuesto por una primera parte, previa al punto, que es el indentificador principal y luego corresponde a versiones o sub-identificaciones. Para nuestro análisis necesitamos únicamente identificador principal.  
+El código de la muestra (nombre de la columna) está compuesto por letras y números que brindan información sobre el proyecto, el sitio de extracción de la muestra, etc. En el siguiente [link](https://docs.gdc.cancer.gov/Encyclopedia/pages/TCGA_Barcode/) de la documentación del _National Cancer Institute_ se encuentra disponible la información para comprender cómo es la clasificación y qué información puedo obtener del código identificador. La descripción completa del código se encuentra en disponible en [TCGA Code Tables](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables).  
+La correcta interpretación del código, nos permitirá seleccionar aquellas muestras de interés y generar una asignación correcta de las mismas para los análisis de contrastes entre grupos.  
+El identificador del gen es el acordado por el Consorcio de Anotación de Genomas (Gencode) y está compuesto por una primera parte, previa al punto, que es el indentificador principal y luego corresponde a versiones o sub-identificaciones. Para nuestro análisis necesitamos únicamente identificador principal.  
 A modo exploratorio podemos construir una tabla que contabilice la cantidad de tipos de muestra, según el criterio "sample type":
 ```R
 table(substr(colnames(rnaseq[,-1]), 14, 15)) # para construir una tabla de conteo según el "sample type" indicado en los lugares 14 y 15 del código identificador
@@ -65,12 +67,18 @@ table(substr(colnames(rnaseq[,-1]), 14, 15)) # para construir una tabla de conte
 1110    7  113 
 ```
 En nuestra matriz de expresión contamos con 1110 datos provenientes de tumores sólidos (01), 7 de tumores metastásicos (06) y 113 de tejido no tumoral (11).  
-
+Para este análisis vamos a utilizar únicamente las muestras que provengan de tumores sólidos.
 ### Limpieza de datos
 Aquí utilizaremos distintas funciones del paquete _tydiverse_ para acortar nombres y reasignar etiquetas
+- Recorte de los nombres de genes
 ```R
-
+rownames(rnaseq) <- sub( # la función sub sirve para reemplazar mediante el criterio "match and replace"
+  "\\..*",  # el argumento "\\..*" es el match, un punto seguido de cualquier cantidad de caracteres
+                        "", # el argumento "" es el replace 
+                        rownames(rnaseq)) # objeto a ser reemplazado
 ```
+- Remoción de muestras de tejido no tumoral y tumores metastásicos
+En principio vamos
 ```R
 
 ```
