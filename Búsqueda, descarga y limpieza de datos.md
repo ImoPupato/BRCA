@@ -117,12 +117,12 @@ Aquí utilizaremos distintas funciones del paquete _tydiverse_ para acortar nomb
 ```R
 rownames(rnaseq) <- sub( # la función sub sirve para reemplazar mediante el criterio "match and replace"
   "\\..*",  # el argumento "\\..*" es el match, un punto seguido de cualquier cantidad de caracteres
-                        "", # el argumento "" es el replace 
-                        rownames(rnaseq)) # objeto a ser reemplazado
+  "", # el argumento "" es el replace 
+  rownames(rnaseq)) # objeto a ser reemplazado
 ```
 - Remoción de muestras de tejido no tumoral y tumores metastásicos
 ```R
-rnaseq <- rnaseq[, !(substr(colnames(rnaseq), 14, 15) == "11")]
+rnaseq <- rnaseq[, !(substr(colnames(rnaseq), 14, 15) == "11")] # debemos tomar como caracter al número 11 porque el código posee letras y numeros
 ```
 - Asignación de etiquetas para contraste
 Aquí utilizaremos las funciones 'mutate' y 'case_when' del paquete _dplyr_:
@@ -133,5 +133,6 @@ clinica <- clinica %>%
     patient.menopause_status == "pre (<6 months since lmp and no prior bilateral ovariectomy and not on estrogen replacement)" ~ "Pre",
     TRUE ~ "Indeterminada"
   ))
-table(clinica$estadio.menop)
+clinica$patient.bcr_patient_barcode<-toupper(clinica$patient.bcr_patient_barcode)
+
 ```
