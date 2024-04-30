@@ -6,6 +6,9 @@ setwd("G:/Mi unidad/INC")
 ```R
 library(TCGAbiolinks) # para acceder a los datos de TCGA  
 library(SummarizedExperiment) # para trabajar las matrices de diseños de experimentos  
+library("RTCGA") # para acceder a los paquetes de TCGA para R
+library("RTCGA.clinical") # para acceder a la información clínica
+library(dplyr)
 library(edgeR) # para la transformación de cuentas crudas a CPM y el análisis de DEGs  
 library(tidyverse) # para manipular los datos, incluye a dplyr, tidyr y ggplot2  
 library(org.Hs.eg.db) # para convertir la notación de genes entre ESNSEMBL, SYMBOL, ENTREZ, etc  
@@ -44,11 +47,12 @@ BRCA.exp <- GDCprepare(
   save = TRUE,
   save.filename = "BRCAExp.rda") # nombre del archivo, la extensión ".rda" corresponde a "datos de R"
 ```
-### Acceso y exploración de la matriz de expresión (RNAseq)
+### Acceso y exploración de la matriz de expresión (RNAseq) y la información clínica
+- Matriz de expresión (RNASeq)  
 En este paso utilizaremos la función 'assay' del paquete _SummarizedExperiment_:
 ```R
 rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en un objeto
-write.table(rnaseq, "RNASeq(counts)_BCRA.txt") # para guardar la matriz en un archivo .txt
+write.table(rnaseq, "RNASeq(counts)_BRCA.txt") # para guardar la matriz en un archivo .txt
 ```
 Al explorar la matriz podemos ver cómo se asignan los códigos de cada muestra (nombre de columna) y cada gen (nombre de fila)
 ```R
@@ -62,15 +66,54 @@ La correcta interpretación del código, nos permitirá seleccionar aquellas mue
 El identificador del gen es el acordado por el Consorcio de Anotación de Genomas (Gencode) y está compuesto por una primera parte, previa al punto, que es el indentificador principal y luego corresponde a versiones o sub-identificaciones. Para nuestro análisis necesitamos únicamente identificador principal.  
 A modo exploratorio podemos construir una tabla que contabilice la cantidad de tipos de muestra, según el criterio "sample type":
 ```R
-table(substr(colnames(rnaseq[,-1]), 14, 15)) # para construir una tabla de conteo según el "sample type" indicado en los lugares 14 y 15 del código identificador
+table(substr(colnames(rnaseq), 14, 15)) # para construir una tabla de conteo según el "sample type" indicado en los lugares 14 y 15 del código identificador
   01   06   11 
-1110    7  113 
+1111    7  113 
 ```
 En nuestra matriz de expresión contamos con 1110 datos provenientes de tumores sólidos (01), 7 de tumores metastásicos (06) y 113 de tejido no tumoral (11).  
 Para este análisis vamos a utilizar únicamente las muestras que provengan de tumores sólidos.
+
+- Información clínica
+Aquí utilizaremos el paquete _RTCGA.clinical_ que nos permite descargar directamente la base:
+```R
+clinica<-as.data.frame(BRCA.clinical) # para guardar la información clínica en un objeto de tipo data frame
+dim(clinica)
+[1] 1098 3703
+```
+Al explorar el data frame podemos ver que está compuesto por 1098 filas y 3703 columnas. Variables de interés pueden ser el sexo asignado al nacer, estadio de menopausia, etnia y raza, etc.:
+```R
+table(clinica$patient.gender)
+female   male 
+  1086     12 
+```
+```R
+table(clinica$patient.ethnicity)
+    hispanic or latino not hispanic or latino 
+```
+```R
+table(clinica$patient.race)
+american indian or alaska native                            asian        black or african american 
+                               1                               61                              183 
+                           white 
+                             758 
+```
+```R
+table(clinica$patient.menopause_status)
+
+                                               indeterminate (neither pre or postmenopausal) 
+                                                                                          34 
+                                              peri (6-12 months since last menstrual period) 
+                                                                                          39 
+           post (prior bilateral ovariectomy or >12 mo since lmp with no prior hysterectomy) 
+                                                                                         705 
+pre (<6 months since lmp and no prior bilateral ovariectomy and not on estrogen replacement) 
+                                                                                         230                  39                    885
+```
 ### Limpieza de datos
-Aquí utilizaremos distintas funciones del paquete _tydiverse_ para acortar nombres y reasignar etiquetas
+Antes de proceder a la limpieza de los datos, debemos preguntarnos cuál es nuestro objetivo. En este caso queremos contrastar la expresión diferencial de RNASeq en muestras de tumores de mama sólidos de acuerdo al estadío pre y post menupáusico.  
+Para cumplir nuestro objetivo necesitamos tener los genes correctamente asignados (sin variantes), eliminar los registros de muestras no tumorales y tumores metastásicos, asignar la situación menopáusica.
 - Recorte de los nombres de genes
+Aquí utilizaremos distintas funciones del paquete _tydiverse_ para acortar nombres, reasignar etiquetas y seleccionar datos:
 ```R
 rownames(rnaseq) <- sub( # la función sub sirve para reemplazar mediante el criterio "match and replace"
   "\\..*",  # el argumento "\\..*" es el match, un punto seguido de cualquier cantidad de caracteres
@@ -78,10 +121,17 @@ rownames(rnaseq) <- sub( # la función sub sirve para reemplazar mediante el cri
                         rownames(rnaseq)) # objeto a ser reemplazado
 ```
 - Remoción de muestras de tejido no tumoral y tumores metastásicos
-En principio vamos
 ```R
-
+rnaseq <- rnaseq[, !(substr(colnames(rnaseq), 14, 15) == "11")]
 ```
+- Asignación de etiquetas para contraste
+Aquí utilizaremos las funciones 'mutate' y 'case_when' del paquete _dplyr_:
 ```R
-
+clinica <- clinica %>%
+  mutate(estadio.menop = case_when(
+    patient.menopause_status == "post (prior bilateral ovariectomy or >12 mo since lmp with no prior hysterectomy)" ~ "Post",
+    patient.menopause_status == "pre (<6 months since lmp and no prior bilateral ovariectomy and not on estrogen replacement)" ~ "Pre",
+    TRUE ~ "Indeterminada"
+  ))
+table(clinica$estadio.menop)
 ```
