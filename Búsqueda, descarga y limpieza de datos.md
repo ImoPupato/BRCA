@@ -181,5 +181,13 @@ salida$Expresion = ifelse(salida$FDR < 0.01 & abs(salida$logFC) >= 1,
 table(salida$Expresion)
 ```
 ### Analisis de sobrerrepresentación de vías
-Para este análisis utilizaremos los paquete edgeR de Bioconductor, si bien hay una breve explicación de cada línea del código, para mayor comprensión se recomienda leer la [guía de usuario](https://bioconductor.org/packages/release/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf).
+Para este análisis utilizaremos los paquetes org.Hs.eg.db; ReactomePA para el análisis de sobrerrepresentación de vías y enrichplot para el gráfico de enriquecimiento.
 ```R
+genes.de<-c(subset(salida$row_names,salida$Expresion!="Stable"))
+vias.enriquecidas <- enrichPathway(gene=select(org.Hs.eg.db,genes.de,"ENTREzID,pvalueCutoff=0.05, readable=T)
+head(as.data.frame(vias.enriquecidas))
+
+#Graficamos el dotplot
+p<-dotplot(x, showCategory=26, font.size = 10)
+```
+### Bibliografía
