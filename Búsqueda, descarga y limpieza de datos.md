@@ -174,11 +174,12 @@ y<-estimateDisp(y,design) # estimación de la dispersión o análisis propiament
 et<-exactTest(y) # creación del objeto con la salida del análisis estadístico 
 is.de<-decideTests(et) # con la función decideTest aplicada al objeto et, se indica cuáles son los diferencialmente expresados
 summary(is.de) # resumen del análisis
-summary(is.de)              
-df<-as.data.frame(topTags(et,n=Inf))
-df$Expression = ifelse(df$FDR < 0.01 & abs(df$logFC) >= 1, 
-                       ifelse(df> 1 ,'Up','Down'),
-                       'Stable')
-table(df$Expression)
+salida<-as.data.frame(topTags(et,n=Inf)) #guardar en un objeto la salida del análisis
+salida$Expresion = ifelse(salida$FDR < 0.01 & abs(salida$logFC) >= 1, 
+                       ifelse(salida> 1 ,'Up','Down'),
+                       'Stable') # asignamos la expresión según nuestro criterio
+table(salida$Expresion)
 ```
-
+### Analisis de sobrerrepresentación de vías
+Para este análisis utilizaremos los paquete edgeR de Bioconductor, si bien hay una breve explicación de cada línea del código, para mayor comprensión se recomienda leer la [guía de usuario](https://bioconductor.org/packages/release/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf).
+```R
