@@ -47,11 +47,21 @@ BRCA.exp <- GDCprepare(
   save = TRUE,
   save.filename = "BRCAExp.rda") # nombre del archivo, la extensión ".rda" corresponde a "datos de R"
 ```
+Una vez guardada la información del dataset, podemos acceder a ella con el cógido:
+```R
+load("G:/Mi unidad/INC/BRCAExp.rda")
+```
+
 ### Acceso y exploración de la matriz de expresión (RNAseq) y la información clínica
 - Matriz de expresión (RNASeq)  
 En este paso utilizaremos la función 'assay' del paquete _SummarizedExperiment_:
 ```R
-rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en un objeto
+rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en un objeto, si trabajamos desde BRCA.exp
+rnaseq <- `rownames<-`( # para asignar las etiquetas a las filas
+  `colnames<-`( # para asignar las etiquetas a las columnas
+    data@assays@data@listData[["unstranded"]], # contenido de la tabla
+    data@colData@rownames), # etiquetas de las columnas
+  data@rowRanges@ranges@NAMES) # etiquetas de las filas
 write.table(rnaseq, "RNASeq(counts)_BRCA.txt") # para guardar la matriz en un archivo .txt
 ```
 Al explorar la matriz podemos ver cómo se asignan los códigos de cada muestra (nombre de columna) y cada gen (nombre de fila)
@@ -70,7 +80,7 @@ table(substr(colnames(rnaseq), 14, 15)) # para construir una tabla de conteo seg
   01   06   11 
 1111    7  113 
 ```
-En nuestra matriz de expresión contamos con 1110 datos provenientes de tumores sólidos (01), 7 de tumores metastásicos (06) y 113 de tejido no tumoral (11).  
+En nuestra matriz de expresión contamos con 1111 datos provenientes de tumores sólidos (01), 7 de tumores metastásicos (06) y 113 de tejido no tumoral (11).  
 Para este análisis vamos a utilizar únicamente las muestras que provengan de tumores sólidos.
 
 - Información clínica
@@ -88,7 +98,8 @@ female   male
 ```
 ```R
 table(clinica$patient.ethnicity)
-    hispanic or latino not hispanic or latino 
+    hispanic or latino not hispanic or latino
+                    39                    885 
 ```
 ```R
 table(clinica$patient.race)
@@ -112,27 +123,62 @@ pre (<6 months since lmp and no prior bilateral ovariectomy and not on estrogen 
 ### Limpieza de datos
 Antes de proceder a la limpieza de los datos, debemos preguntarnos cuál es nuestro objetivo. En este caso queremos contrastar la expresión diferencial de RNASeq en muestras de tumores de mama sólidos de acuerdo al estadío pre y post menupáusico.  
 Para cumplir nuestro objetivo necesitamos tener los genes correctamente asignados (sin variantes), eliminar los registros de muestras no tumorales y tumores metastásicos, asignar la situación menopáusica.
-- Recorte de los nombres de genes
+- Recorte de los nombres de genes, remoción de muestras de tejido no tumoral y tumores metastásicos, recorte de códigos en los nombres de las muestras y orden alfabético en la matriz de expresión.
 Aquí utilizaremos distintas funciones del paquete _tydiverse_ para acortar nombres, reasignar etiquetas y seleccionar datos:
 ```R
-rownames(rnaseq) <- sub( # la función sub sirve para reemplazar mediante el criterio "match and replace"
-  "\\..*",  # el argumento "\\..*" es el match, un punto seguido de cualquier cantidad de caracteres
-  "", # el argumento "" es el replace 
-  rownames(rnaseq)) # objeto a ser reemplazado
+rnaseq <- rnaseq %>%
+  `rownames<-`(sub(  %>% # la función sub sirve para reemplazar mediante el criterio "match and replace", 
+    "\\..*",  # el argumento "\\..*" es el match, un punto seguido de cualquier cantidad de caracteres
+    "", # el argumento "" es el replace 
+    rownames(.))) %>% # objeto a ser reemplazado
+  `[`(, !(substr(colnames(.), 14, 15) == "11")) %>% # debemos tomar como caracter al número 11 porque el código posee letras y numeros
+  `colnames<-`(substr(colnames(.), 1, 12)) %>% # para acortar el nombre para que sea igual al utilizado en la información clínica
+  `[`(, order(colnames(.))) # ordenar alfabéticamente
 ```
-- Remoción de muestras de tejido no tumoral y tumores metastásicos
-```R
-rnaseq <- rnaseq[, !(substr(colnames(rnaseq), 14, 15) == "11")] # debemos tomar como caracter al número 11 porque el código posee letras y numeros
-```
-- Asignación de etiquetas para contraste
-Aquí utilizaremos las funciones 'mutate' y 'case_when' del paquete _dplyr_:
+- Asignación de etiquetas para el contraste y orden alfabético en la tabla de información clínica.
+Aquí utilizaremos las funciones 'mutate', 'case_when' y 'arrange' del paquete _dplyr_:
 ```R
 clinica <- clinica %>%
-  mutate(estadio.menop = case_when(
-    patient.menopause_status == "post (prior bilateral ovariectomy or >12 mo since lmp with no prior hysterectomy)" ~ "Post",
-    patient.menopause_status == "pre (<6 months since lmp and no prior bilateral ovariectomy and not on estrogen replacement)" ~ "Pre",
-    TRUE ~ "Indeterminada"
-  ))
-clinica$patient.bcr_patient_barcode<-toupper(clinica$patient.bcr_patient_barcode)
-
+  mutate(
+    estadio.menop = case_when(
+      patient.menopause_status == "post (prior bilateral ovariectomy or >12 mo since lmp with no prior hysterectomy)" ~ "Post",
+      patient.menopause_status == "pre (<6 months since lmp and no prior bilateral ovariectomy and not on estrogen replacement)" ~ "Pre",
+      TRUE ~ "Indeterminada"
+    ),
+    patient.bcr_patient_barcode = toupper(patient.bcr_patient_barcode) # para que coincida con las etiquetas de rnaseq
+  ) %>%
+  arrange(patient.bcr_patient_barcode) # para ordenar alfabeticamente
 ```
+- Generación del _sub_ set de datos con información clínica
+```R
+rnaseq <- rnaseq[, # para seleccionar todas las filas
+                 colnames(rnaseq) # para seleccionar las columnas cuyo nombre cumple con el siguiente requisito
+                 %in% clinica$patient.bcr_patient_barcode # para que solo selecciones según la información clínica
+                 & !duplicated(colnames(rnaseq)) # para que no incluya valores duplicados en caso que los haya
+                 & clinica$estadio.menop != "Indeterminada"] # para que no incluya a quienes no tienen un estadio menopausico asignado
+```
+- Generación del vector de etiquetas
+```R
+etiquetas <- subset(clinica$estadio.menop, clinica$patient.bcr_patient_barcode %in% colnames(rnaseq))
+```
+### Análisis de la expresión diferencial
+Para este análisis utilizaremos el paquete edgeR de Bioconductor, si bien hay una breve explicación de cada línea del código, para mayor comprensión se recomienda leer la [guía de usuario](https://bioconductor.org/packages/release/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf).
+```R
+y<-DGEList(rnaseq) # creación del objeto DGE para el análisis, utilizamos las cuentas crudas de RNASeq
+y[["samples"]]$group<-etiquetas # asignamos las etiquetas de cada columna para hacer el contraste
+keep <- filterByExpr(y) # utilizando el método propuesto por el paquete edgeR para decidir qué "probs" se quedan y cuales deben eliminarse, se genera un vector lógico
+y <- y[keep,,keep.lib.sizes=FALSE] # nos quedamos con aquellas que cumplen los requisitos para ser incluidas en el análisis
+y <- calcNormFactors(y) # se determinan los factores de normalización
+design<-model.matrix(~grupo) # se construye el diseño del contraste
+y<-estimateDisp(y,design) # estimación de la dispersión o análisis propiamente dicho
+et<-exactTest(y) # creación del objeto con la salida del análisis estadístico 
+is.de<-decideTests(et) # con la función decideTest aplicada al objeto et, se indica cuáles son los diferencialmente expresados
+summary(is.de) # resumen del análisis
+summary(is.de)              
+df<-as.data.frame(topTags(et,n=Inf))
+df$Expression = ifelse(df$FDR < 0.01 & abs(df$logFC) >= 1, 
+                       ifelse(df> 1 ,'Up','Down'),
+                       'Stable')
+table(df$Expression)
+```
+
