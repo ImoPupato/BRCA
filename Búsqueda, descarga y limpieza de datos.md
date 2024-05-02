@@ -56,7 +56,7 @@ load("G:/Mi unidad/INC/BRCAExp.rda")
 - Matriz de expresión (RNASeq)  
 En este paso utilizaremos la función 'assay' del paquete _SummarizedExperiment_:
 ```R
-rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en un objeto, si trabajamos desde BRCA.exp
+rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en un objeto, si trabajamos desde BRCA.exp, sino utilizar el siguiente código
 rnaseq <- `rownames<-`( # para asignar las etiquetas a las filas
   `colnames<-`( # para asignar las etiquetas a las columnas
     data@assays@data@listData[["unstranded"]], # contenido de la tabla
