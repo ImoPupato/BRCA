@@ -4,7 +4,7 @@ setwd("G:/Mi unidad/INC")
 ```
 ### Carga de librerías
 ```R
-library(TCGAbiolinks) # para acceder a los datos de TCGA  
+library("TCGAbiolinks") # para acceder a los datos de TCGA  
 library(SummarizedExperiment) # para trabajar las matrices de diseños de experimentos  
 library("RTCGA") # para acceder a los paquetes de TCGA para R
 library("RTCGA.clinical") # para acceder a la información clínica
@@ -127,7 +127,7 @@ Para cumplir nuestro objetivo necesitamos tener los genes correctamente asignado
 Aquí utilizaremos distintas funciones del paquete _tydiverse_ para acortar nombres, reasignar etiquetas y seleccionar datos:
 ```R
 rnaseq <- rnaseq %>%
-  `rownames<-`(sub(  %>% # la función sub sirve para reemplazar mediante el criterio "match and replace", 
+  `rownames<-`(sub(   # la función sub sirve para reemplazar mediante el criterio "match and replace", 
     "\\..*",  # el argumento "\\..*" es el match, un punto seguido de cualquier cantidad de caracteres
     "", # el argumento "" es el replace 
     rownames(.))) %>% # objeto a ser reemplazado
@@ -169,7 +169,7 @@ y[["samples"]]$group<-etiquetas # asignamos las etiquetas de cada columna para h
 keep <- filterByExpr(y) # utilizando el método propuesto por el paquete edgeR para decidir qué "probs" se quedan y cuales deben eliminarse, se genera un vector lógico
 y <- y[keep,,keep.lib.sizes=FALSE] # nos quedamos con aquellas que cumplen los requisitos para ser incluidas en el análisis
 y <- calcNormFactors(y) # se determinan los factores de normalización
-design<-model.matrix(~grupo) # se construye el diseño del contraste
+design<-model.matrix(~etiquetas) # se construye el diseño del contraste
 y<-estimateDisp(y,design) # estimación de la dispersión o análisis propiamente dicho
 et<-exactTest(y) # creación del objeto con la salida del análisis estadístico 
 is.de<-decideTests(et) # con la función decideTest aplicada al objeto et, se indica cuáles son los diferencialmente expresados
@@ -179,12 +179,28 @@ salida$Expresion = ifelse(salida$FDR < 0.01 & abs(salida$logFC) >= 1,
                        ifelse(salida> 1 ,'Up','Down'),
                        'Stable') # asignamos la expresión según nuestro criterio
 table(salida$Expresion)
+write.table("salida","Exact test BCRA vs estadio menop.txt")
 ```
 ### Analisis de sobrerrepresentación de vías
 Para este análisis utilizaremos los paquetes org.Hs.eg.db; ReactomePA para el análisis de sobrerrepresentación de vías y enrichplot para el gráfico de enriquecimiento.
 ```R
-genes.de<-c(subset(salida$row_names,salida$Expresion!="Stable"))
-vias.enriquecidas <- enrichPathway(gene=select(org.Hs.eg.db,genes.de,"ENTREzID,pvalueCutoff=0.05, readable=T)
+genes.de<-c(subset(rownames(salida),salida$Expresion!="Stable"))
+
+???vias.enriquecidas <- enrichPathway(gene=select(org.Hs.eg.db,genes.de,"ENTREZID",pvalueCutoff=0.05, readable=T))
+vav3<-c(subset(x$row_names,x$Expression!="Stable"))
+my.symbols <- vav3
+
+# Seleccionamos lo que queremos "comparar", en este caso Reactome necesita el ENTREZ y tenemos en SYMBOL 
+IDS<-select(hs, 
+            keys = my.symbols,
+            columns = c("ENTREZID", "SYMBOL"),
+            keytype = "SYMBOL")
+
+#Seleccionamos el ENTREZ que es lo que usa Reactome
+names_ids<-IDS$ENTREZID
+
+# Hacemos el Enrichment analysis
+x <- enrichPathway(gene=names_ids,pvalueCutoff=0.05, readable=T)
 head(as.data.frame(vias.enriquecidas))
 
 #Graficamos el dotplot
