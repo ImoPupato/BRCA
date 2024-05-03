@@ -221,12 +221,18 @@ head(as.data.frame(vias.enriquecidas))
 #Graficamos el dotplot
 p<-dotplot(x, showCategory=26, font.size = 10)
 ```
-### Bibliografía
--Chen Y, Chen L, Lun ATL, Baldoni P, Smyth GK (2024). “edgeR 4.0: powerful differential analysis of sequencing data with expanded functionality and improved support for small counts and larger datasets.” bioRxiv. doi:10.1101/2024.01.21.576131.  
+### Referencias
+- Carlson M (2019). org.Hs.eg.db: Genome wide annotation for Human. R package version 3.8.2.  
+- Chen Y, Chen L, Lun ATL, Baldoni P, Smyth GK (2024). “edgeR 4.0: powerful differential analysis of sequencing data with expanded functionality and improved support for small counts and larger datasets.” bioRxiv. doi:10.1101/2024.01.21.576131.  
 - Chen Y, Lun ATL, Smyth GK (2016). “From reads to genes to pathways: differential expression analysis of RNA-Seq experiments using Rsubread and the edgeR quasi-likelihood pipeline.” F1000Research, 5, 1438. doi:10.12688/f1000research.8987.2.  
 - Colaprico A, Silva TC, Olsen C, Garofano L, Cava C, Garolini D, Sabedot T, Malta TM, Pagnotta SM, Castiglioni I, Ceccarelli M, Bontempi G, Noushmehr H (2015). “TCGAbiolinks: An R/Bioconductor package for integrative analysis of TCGA data.” Nucleic Acids Research. doi:10.1093/nar/gkv1507, http://doi.org/10.1093/nar/gkv1507.  
+- Kosinski M (2024). RTCGA: The Cancer Genome Atlas Data Integration. R package version 1.34.0, https://rtcga.github.io/RTCGA.
+- Kosinski M (2024). RTCGA.clinical: Clinical datasets from The Cancer Genome Atlas Project. R package version 20151101.34.0.  
 - McCarthy DJ, Chen Y, Smyth GK (2012). “Differential expression analysis of multifactor RNA-Seq experiments with respect to biological variation.” Nucleic Acids Research, 40(10), 4288-4297. doi:10.1093/nar/gks042.  
 -Morgan M, Obenchain V, Hester J, Pagès H (2024). SummarizedExperiment: SummarizedExperiment container. R package version 1.34.0, https://bioconductor.org/packages/SummarizedExperiment.  
 - Mounir, Mohamed, Lucchetta, Marta, Silva, C T, Olsen, Catharina, Bontempi, Gianluca, Chen, Xi, Noushmehr, Houtan, Colaprico, Antonio, Papaleo, Elena (2019). “New functionalities in the TCGAbiolinks package for the study and integration of cancer data from GDC and GTEx.” PLoS computational biology, 15(3), e1006701.
 - Robinson MD, McCarthy DJ, Smyth GK (2010). “edgeR: a Bioconductor package for differential expression analysis of digital gene expression data.” Bioinformatics, 26(1), 139-140. doi:10.1093/bioinformatics/btp616.  
 - Silva, C T, Colaprico, Antonio, Olsen, Catharina, D'Angelo, Fulvio, Bontempi, Gianluca, Ceccarelli, Michele, Noushmehr, Houtan (2016). “TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages.” F1000Research, 5.
+- Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A, Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J, Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H (2019). “Welcome to the tidyverse.” Journal of Open Source Software, 4(43), 1686. doi:10.21105/joss.01686.
+- Yu G (2024). enrichplot: Visualization of Functional Enrichment Result. R package version 1.24.0, https://yulab-smu.top/biomedical-knowledge-mining-book/.  
+- Yu G, He Q (2016). “ReactomePA: an R/Bioconductor package for reactome pathway analysis and visualization.” Molecular BioSystems, 12(12), 477-479. doi:10.1039/C5MB00663E, http://pubs.rsc.org/en/Content/ArticleLanding/2015/MB/C5MB00663E.
