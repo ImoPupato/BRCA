@@ -5,14 +5,14 @@ setwd("G:/Mi unidad/INC")
 ### Carga de librerías
 ```R
 library("TCGAbiolinks") # para acceder a los datos de TCGA  
-library(SummarizedExperiment) # para trabajar las matrices de diseños de experimentos  
+library("SummarizedExperiment") # para trabajar las matrices de diseños de experimentos  
 library("RTCGA") # para acceder a los paquetes de TCGA para R
 library("RTCGA.clinical") # para acceder a la información clínica
-library(dplyr)
-library(edgeR) # para la transformación de cuentas crudas a CPM y el análisis de DEGs  
-library(tidyverse) # para manipular los datos, incluye a dplyr, tidyr y ggplot2  
-library(org.Hs.eg.db) # para convertir la notación de genes entre ESNSEMBL, SYMBOL, ENTREZ, etc  
-library(ReactomePA) # para el ORA  
+library("dplyr")
+library("edgeR") # para la transformación de cuentas crudas a CPM y el análisis de DEGs  
+library("tidyverse") # para manipular los datos, incluye a dplyr, tidyr y ggplot2  
+library("org.Hs.eg.db") # para convertir la notación de genes entre ESNSEMBL, SYMBOL, ENTREZ, etc  
+library("ReactomePA") # para el ORA  
 library("enrichplot") # para el gráfico de enriquecimiento  
 ```
 ### Generación de la búsqueda, descarga y creación de la tabla de expresión  
@@ -51,18 +51,28 @@ Una vez guardada la información del dataset, podemos acceder a ella con el cóg
 ```R
 load("G:/Mi unidad/INC/BRCAExp.rda")
 ```
-
+---------------------
 ### Acceso y exploración de la matriz de expresión (RNAseq) y la información clínica
 - Matriz de expresión (RNASeq)  
-En este paso utilizaremos la función 'assay' del paquete _SummarizedExperiment_:
+    - - Desde BRCA.exp: utilizaremos la función 'assay' del paquete _SummarizedExperiment_:
 ```R
-rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en un objeto, si trabajamos desde BRCA.exp, sino utilizar el siguiente código
+rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en el objeto rnaseq
+```
+    - - Desde data vía load BRCA.rda:
+```R
 rnaseq <- `rownames<-`( # para asignar las etiquetas a las filas
   `colnames<-`( # para asignar las etiquetas a las columnas
     data@assays@data@listData[["unstranded"]], # contenido de la tabla
     data@colData@rownames), # etiquetas de las columnas
   data@rowRanges@ranges@NAMES) # etiquetas de las filas
-write.table(rnaseq, "RNASeq(counts)_BRCA.txt") # para guardar la matriz en un archivo .txt
+# write.table(rnaseq, "RNASeq(counts)_BRCA.txt") # para guardar la matriz en un archivo .txt
+```
+A modo de control podemos pedir las dimensiones de la matriz, así como la clase de objeto:
+```R
+class(rnaseq)
+[1] "matrix" "array" 
+dim(rnaseq)
+[1] 60660  1231
 ```
 Al explorar la matriz podemos ver cómo se asignan los códigos de cada muestra (nombre de columna) y cada gen (nombre de fila)
 ```R
@@ -134,6 +144,8 @@ rnaseq <- rnaseq %>%
   `[`(, !(substr(colnames(.), 14, 15) == "11")) %>% # debemos tomar como caracter al número 11 porque el código posee letras y numeros
   `colnames<-`(substr(colnames(.), 1, 12)) %>% # para acortar el nombre para que sea igual al utilizado en la información clínica
   `[`(, order(colnames(.))) # ordenar alfabéticamente
+dim(rnaseq)
+[1] 60660  1118
 ```
 - Asignación de etiquetas para el contraste y orden alfabético en la tabla de información clínica.
 Aquí utilizaremos las funciones 'mutate', 'case_when' y 'arrange' del paquete _dplyr_:
@@ -156,6 +168,9 @@ rnaseq <- rnaseq[, # para seleccionar todas las filas
                  %in% clinica$patient.bcr_patient_barcode # para que solo selecciones según la información clínica
                  & !duplicated(colnames(rnaseq)) # para que no incluya valores duplicados en caso que los haya
                  & clinica$estadio.menop != "Indeterminada"] # para que no incluya a quienes no tienen un estadio menopausico asignado
+dim(rnaseq)
+[1] 60660   926
+# write.table(rnaseq, "RNASeq(counts)_BRCA_limpio.txt") # para guardar la matriz en un archivo .txt
 ```
 - Generación del vector de etiquetas
 ```R
@@ -207,3 +222,11 @@ head(as.data.frame(vias.enriquecidas))
 p<-dotplot(x, showCategory=26, font.size = 10)
 ```
 ### Bibliografía
+-Chen Y, Chen L, Lun ATL, Baldoni P, Smyth GK (2024). “edgeR 4.0: powerful differential analysis of sequencing data with expanded functionality and improved support for small counts and larger datasets.” bioRxiv. doi:10.1101/2024.01.21.576131.  
+- Chen Y, Lun ATL, Smyth GK (2016). “From reads to genes to pathways: differential expression analysis of RNA-Seq experiments using Rsubread and the edgeR quasi-likelihood pipeline.” F1000Research, 5, 1438. doi:10.12688/f1000research.8987.2.  
+- Colaprico A, Silva TC, Olsen C, Garofano L, Cava C, Garolini D, Sabedot T, Malta TM, Pagnotta SM, Castiglioni I, Ceccarelli M, Bontempi G, Noushmehr H (2015). “TCGAbiolinks: An R/Bioconductor package for integrative analysis of TCGA data.” Nucleic Acids Research. doi:10.1093/nar/gkv1507, http://doi.org/10.1093/nar/gkv1507.  
+- McCarthy DJ, Chen Y, Smyth GK (2012). “Differential expression analysis of multifactor RNA-Seq experiments with respect to biological variation.” Nucleic Acids Research, 40(10), 4288-4297. doi:10.1093/nar/gks042.  
+-Morgan M, Obenchain V, Hester J, Pagès H (2024). SummarizedExperiment: SummarizedExperiment container. R package version 1.34.0, https://bioconductor.org/packages/SummarizedExperiment.  
+- Mounir, Mohamed, Lucchetta, Marta, Silva, C T, Olsen, Catharina, Bontempi, Gianluca, Chen, Xi, Noushmehr, Houtan, Colaprico, Antonio, Papaleo, Elena (2019). “New functionalities in the TCGAbiolinks package for the study and integration of cancer data from GDC and GTEx.” PLoS computational biology, 15(3), e1006701.
+- Robinson MD, McCarthy DJ, Smyth GK (2010). “edgeR: a Bioconductor package for differential expression analysis of digital gene expression data.” Bioinformatics, 26(1), 139-140. doi:10.1093/bioinformatics/btp616.  
+- Silva, C T, Colaprico, Antonio, Olsen, Catharina, D'Angelo, Fulvio, Bontempi, Gianluca, Ceccarelli, Michele, Noushmehr, Houtan (2016). “TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages.” F1000Research, 5.
