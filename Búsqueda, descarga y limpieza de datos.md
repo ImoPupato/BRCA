@@ -53,13 +53,12 @@ load("G:/Mi unidad/INC/BRCAExp.rda")
 ```
 ---------------------
 ### Acceso y exploración de la matriz de expresión (RNAseq) y la información clínica
-- Matriz de expresión (RNASeq)
-    - Desde BRCA.exp: utilizaremos la función 'assay' del paquete _SummarizedExperiment_:  
+#### Matriz de expresión (RNASeq)
+- Desde _BRCA.exp_: utilizaremos la función 'assay' del paquete _SummarizedExperiment_:  
 ```R
 rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en el objeto rnaseq
 ```  
-    - Desde data vía load BRCA.rda:
-    
+- Desde data vía _load BRCA.rda_:  
 ```R
 rnaseq <- `rownames<-`( # para asignar las etiquetas a las filas
   `colnames<-`( # para asignar las etiquetas a las columnas
@@ -68,7 +67,6 @@ rnaseq <- `rownames<-`( # para asignar las etiquetas a las filas
   data@rowRanges@ranges@NAMES) # etiquetas de las filas
 # write.table(rnaseq, "RNASeq(counts)_BRCA.txt") # para guardar la matriz en un archivo .txt
 ```
-
 A modo de control podemos pedir las dimensiones de la matriz, así como la clase de objeto:
 ```R
 class(rnaseq)
@@ -95,7 +93,7 @@ table(substr(colnames(rnaseq), 14, 15)) # para construir una tabla de conteo seg
 En nuestra matriz de expresión contamos con 1111 datos provenientes de tumores sólidos (01), 7 de tumores metastásicos (06) y 113 de tejido no tumoral (11).  
 Para este análisis vamos a utilizar únicamente las muestras que provengan de tumores sólidos.
 
-- Información clínica  
+#### Información clínica  
 Aquí utilizaremos el paquete _RTCGA.clinical_ que nos permite descargar directamente la base:
 ```R
 clinica<-as.data.frame(BRCA.clinical) # para guardar la información clínica en un objeto de tipo data frame
@@ -207,21 +205,25 @@ gene.IDS<-select(org.Hs.eg.db, # organismo de referencia, en este caso hs: homo 
             keys = c(subset(rownames(salida),salida$Expresion!="Stable")), # genes diferencialmente expresados
             columns = c("ENTREZID", "ENSEMBL", "SYMBOL"), # tipo de anotaciones de genes 
             keytype = "ENSEMBL") # referencia comun
-´´´
+```
+
 - Analisis de enriquecimiento de vias (ORA):
+
 ```R
 vias.enriquecidas <- enrichPathway(gene=gene.IDS$ENTREZID, # vector de los genes en notación ENTREZ
                                    pvalueCutoff=0.05, # valor de corte
                                    readable=T) # mapear ENTREZ con nombre de genes
 ```
-Podemos explorar las vías enrriquecidas con el siguiente código:
+Podemos explorar las vías enriquecidas con el siguiente código:
+
 ```R
 head(as.data.frame(vias.enriquecidas))
 ```
-### Graficos
+
+### Gráficos
+```R
 dotplot(vias.enriquecidas, font.size = 10) # 
 cnetplot(x, font.size = 10) # nos permite ver la cercania entre las notaciones funcionales y los genes involucrados entre ellas
-
 ```
 ### Referencias
 - Carlson M (2019). org.Hs.eg.db: Genome wide annotation for Human. R package version 3.8.2.  
