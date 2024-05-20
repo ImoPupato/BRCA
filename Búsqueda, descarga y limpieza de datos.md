@@ -63,7 +63,7 @@ load("~Mi unidad/INC/BRCAExp.rda")
 ```R
 rnaseq <- assay(BRCA.exp) # para guardar la matriz de expresión en el objeto rnaseq
 ```  
-- Desde data vía _load BRCA.rda_:  
+- Desde data vía _load BRCAExp.rda_:  
 ```R
 rnaseq <- `rownames<-`( # para asignar las etiquetas a las filas
   `colnames<-`( # para asignar las etiquetas a las columnas
