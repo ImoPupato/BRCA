@@ -27,10 +27,10 @@ browseVignettes("TCGAbiolinks")
 #### Otras librerias
 ```R
 library("tidyverse") # para manipular los datos, incluye a dplyr, tidyr y ggplot2  
-library("dplyr")
 ```
-### Generación de la búsqueda, descarga y creación de la tabla de expresión  
-Aquí solamente utilizamos el paquete _TCGAbiolinks_. 
+### Generación de la búsqueda, descarga y creación de la tabla de expresión 
+Aquí solamente utilizamos el paquete _TCGAbiolinks_.  
+
 #### Búsqueda 
 ```R
 query.exp <- GDCquery(
@@ -54,7 +54,7 @@ BRCA.exp <- GDCprepare(
 ```
 Una vez guardada la información del dataset, podemos acceder a ella con el cógido:
 ```R
-load("G:/Mi unidad/INC/BRCAExp.rda")
+load("~Mi unidad/INC/BRCAExp.rda")
 ```
 ---------------------
 ### Acceso y exploración de la matriz de expresión (RNAseq) y la información clínica
