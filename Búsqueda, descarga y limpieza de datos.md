@@ -1,7 +1,7 @@
 ---
-En este ejemplo llevaramos adelante un análisis de expresión diferencial de genes en un función de un contraste entre grupos.  
-Particularmente utilizaremos el set de datos de RNASeq de muestras provenientes de tumor sólido de mama y el contraste será la situación frente a la menopausia (pre o post menopausia).  
-El set de datos que utilizaremos está en el archivo [BCRAExp.rda](https://drive.google.com/file/d/1nuWHXAsRKBr5WgFvS_wM780_U9iNagKO/view?usp=drive_link). Si bien a continuación se comparten a modo de ejemplo los pasos para descargar el set desde la base de datos [TCGA](https://www.cancer.gov/ccg/research/genome-sequencing/tcga); esto puede demorar dependiendo de la conexión y características del procesador. Por lo que se recomienda descargar desde el link y comenzar el ejercicio desde "Matriz de expresión (RNASeq)-> Desde data vía _load BRCAExp.rda_".  
+#### En este ejemplo llevaramos adelante un análisis de expresión diferencial de genes y enriquecimiento de vías en un función de un contraste entre grupos.  
+#### Particularmente utilizaremos el set de datos de RNASeq de muestras provenientes de tumor sólido de mama y el contraste será la situación frente a la menopausia (pre o post menopausia).  
+#### El set de datos que utilizaremos está en el archivo [BCRAExp.rda](https://drive.google.com/file/d/1nuWHXAsRKBr5WgFvS_wM780_U9iNagKO/view?usp=drive_link). Si bien a continuación se comparten a modo de ejemplo los pasos para descargar el set desde la base de datos [TCGA](https://www.cancer.gov/ccg/research/genome-sequencing/tcga); esto puede demorar dependiendo de la conexión y características del procesador. Por lo que se recomienda descargar desde el link y comenzar el ejercicio desde "Matriz de expresión (RNASeq)-> Desde data vía _load BRCAExp.rda_".  
 ---
 ### Seteo el directorio de trabajo
 ```R
