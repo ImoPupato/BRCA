@@ -1,8 +1,8 @@
 # Comparación de la expresión de ciertos genes de interés y análisis de sobrevida utilizando un set de datos de TCGA.
 En este documento trabajaremos con el proyecto BRCA que contiene datos clínicos y de expresión de genes, entre otros, de muestras de cancer de mama humano.  
-## Librerías utilizadas
+## Paquetes utilizados
 ### Descarga desde Cran
-Primero descargamos los paquetes que hagan falta utilizando la función _install.packages()_ y luego las cargarmos:
+Primero descargamos los paquetes que hagan falta utilizando la función _install.packages()_ y luego los llamamos:
 ```R
 library(tidyverse)
 library(survival)
