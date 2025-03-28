@@ -44,6 +44,28 @@ ggplot(expr, aes(x = Gen, y = Expresión, fill = Gen)) +
        y = "Nivel de Expresión") +
   theme(legend.position = "none")
 ```
-![](https://github.com/ImoPupato/BRCA/blob/main/Boxplot.png){width='100px'}
-
-
+![](https://github.com/ImoPupato/BRCA/blob/main/Boxplot.png)
+## Análisis de sobrevida respecto a la expresión de uno de los genes
+### Selección del valor de corte
+Hay diferentes criterios propuestos para elegir el valor de expresión a utilizar como corte para armar los grupos de expresión alta y baja, en este ejemplo utilizaremos la mediana.
+```R
+expr <- expr %>%
+  group_by(Gen) %>% # calcula la mediana por cada grupo de genes
+  mutate(Exp_group = ifelse(Expresión > median(Expresión, na.rm = TRUE), "Alto", "Bajo")) %>%
+  ungroup() # desagrupamos para seguir con el mismo formato
+```
+### Creación del objeto y de la función necesarios para el gráfico de sobrevida
+Utilizando la función _Surv()_ del paquete 'survival' indicamos el tiempo (_times_) hasta que se produce el evento (1) o pérdida de seguimiento (0), y el estado del paciente respecto de este evento (_patient.vital_status_).
+```R
+surv_obj <- Surv(time = expr$times, event = expr$patient.vital_status)
+```
+Con la función _survfit()_ del paquete 'survival' generamos la "curva de sobrevida" que nos permite indicar la probabilidad de sobrevida respecto del tiempo bajo las dos condiciones elegidas. Para este ejemplo utilizaresmo el gen "BRCA2".
+```
+fit <- survfit(surv_obj ~ Exp_group, data = expr, subset = (Gen == "BRCA2"))
+El paquete 'survminer' nos permite graficar la curva de sobrevida.
+```R
+ggsurvplot(fit, data = expr, pval = TRUE,
+           legend.labs = c("Baja Expresión", "Alta Expresión"),
+           xlab = "Tiempo (dias)", ylab = "Probabilidad de Sobrevida")
+```
+![](https://github.com/ImoPupato/BRCA/blob/main/Sobrevida.png)
