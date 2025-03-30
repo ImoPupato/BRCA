@@ -16,6 +16,8 @@ if (!require("BiocManager", quietly = TRUE))
 BiocManager::install("RTCGA")
 BiocManager::install("RTCGA.clinical")
 BiocManager::install("RTCGA.mRNA")
+library(RTCGA)
+library(RTCGA.clinical)
 library(RTCGA.mRNA)
 ```
 ## Descarga de datos de sobrevida
