@@ -36,7 +36,7 @@ expr <- BRCA.mRNA %>%
                names_to = "Gen", 
                values_to = "Expresión")
 ```
-## Boxplot comparativo de la expresión de genes
+## Boxplot comparativo de mRNA
 ```R
 ggplot(expr, aes(x = Gen, y = Expresión, fill = Gen)) +
   geom_boxplot() +
@@ -47,7 +47,7 @@ ggplot(expr, aes(x = Gen, y = Expresión, fill = Gen)) +
   theme(legend.position = "none")
 ```
 ![](https://github.com/ImoPupato/BRCA/blob/main/Boxplot.png)
-## Análisis de sobrevida respecto a la expresión de uno de los genes
+## Análisis de sobrevida respecto a la expresión de mRNA
 ### Selección del valor de corte
 Hay diferentes criterios propuestos para elegir el valor de expresión a utilizar como corte para armar los grupos de expresión alta y baja, en este ejemplo utilizaremos la mediana.
 ```R
